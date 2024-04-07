@@ -1,0 +1,9 @@
+Fonts used in this design:
+
+Font: Boogaloo
+Author: John Vargas Beltrán
+Url: http://www.fontsquirrel.com/fonts/boogaloo
+
+Font: Source Sans Pro
+Author: Adobe
+Url: http://www.fontsquirrel.com/fonts/source-sans-pro
