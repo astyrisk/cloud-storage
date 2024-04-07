@@ -2,15 +2,18 @@ import { collection, doc, addDoc, setDoc, getDocs, getFirestore } from 'firebase
 import { getAuth} from 'firebase/auth';
 import { getApp } from 'firebase/app';
 
+import {rootStore} from '$lib/store.js';
+
 const app = getApp();
 const auth = getAuth();
 const db = getFirestore(app);
 const user = auth.currentUser;
 
+// convert the following to stores!, use a new object to store the data, rather than the firebase returned ones
 let userDocRef, root;
 if (user) {
 	userDocRef = doc(db, "Users", user.uid);
-	root = collection(userDocRef, "root");
+	root collection(userDocRef, "root");
 }
 
 //NOTE there are two collections in every user document, one collection for folders, another for files
@@ -40,7 +43,6 @@ async function getDirDocs(dir) {
 }
 
 // getDirDocs(root).then(console.log)
--
 function newFile() {
 }
 
