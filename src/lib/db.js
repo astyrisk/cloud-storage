@@ -2,19 +2,14 @@ import { collection, doc, addDoc, setDoc, getDocs, getFirestore } from 'firebase
 import { getAuth} from 'firebase/auth';
 import { getApp } from 'firebase/app';
 
-import {rootStore} from '$lib/store.js';
+import { currentDirStore, currentElementsData } from '$lib/store.js';
+import { get } from 'svelte/store';
 
 const app = getApp();
 const auth = getAuth();
 const db = getFirestore(app);
 const user = auth.currentUser;
 
-// convert the following to stores!, use a new object to store the data, rather than the firebase returned ones
-let userDocRef, root;
-if (user) {
-	userDocRef = doc(db, "Users", user.uid);
-	root collection(userDocRef, "root");
-}
 
 //NOTE there are two collections in every user document, one collection for folders, another for files
 //NOTE every folders collection consists of two collections: folders and files
@@ -32,27 +27,43 @@ async function newFolder(rootCollectionRef) {
 		parent: "root",
 		parentData: ""
 	});
+
 }
 
 /**
  * @param {import("@firebase/firestore/lite").Query<any, import("@firebase/firestore/lite").DocumentData>} dir
  */
-async function getDirDocs(dir) {
+
+async function getDirDocsData(dir) {
 	const querySnapshot = await getDocs(dir);
 	return (querySnapshot.docs.map(x => x.data()));
 }
 
-// getDirDocs(root).then(console.log)
+async function getDirDocs(dir) {
+	const querySnapshot = await getDocs(dir);
+	return querySnapshot.docs;
+}
+
 function newFile() {
 }
 
 function deleteFileOrFolder() {
 }
 
-function goForwardDir() {
+function goForwardDir(dirName) {
+    getDirDocs(get(currentDirStore)).then(x => x.forEach(doc => {
+        if (doc.data().name === dirName && ! doc.data().isFile) {
+            currentDirStore.set(collection(doc.ref, "folder"));
+						getDirDocs(get(currentDirStore)).then(x => currentElementsData.set(x));
+        }
+    }));
 }
 
-function goBackDir() {
+async function goBackDir(dirCollection) {
+	if  (get(currentDirStore).id !== "root") {
+		currentDirStore.set(dirCollection.parent.parent);
+		getDirDocsData(get(currentDirStore)).then(x => currentElementsData.set(x));
+	}
 }
 
 function downloadFile() {
@@ -62,8 +73,6 @@ async function createUserDocument(uid, name, email) {
 	const userDocRef = doc(db, 'Users', uid);
 
 	await setDoc(userDocRef, {
-		// TODO do we have to add uid?
-		uid: uid,
 		name: name,
 		email: email,
 	});
@@ -83,4 +92,4 @@ async function createUserDocument(uid, name, email) {
 		parentData: ""
 	});
 }
-export { createUserDocument,  newFile, newFolder, deleteFileOrFolder,  goForwardDir, goBackDir, downloadFile };
+export { getDirDocsData, getDirDocs, createUserDocument,  newFile, newFolder, deleteFileOrFolder,  goForwardDir, goBackDir, downloadFile };
