@@ -2,7 +2,7 @@ import { collection, doc, addDoc, setDoc, getDocs, getFirestore } from 'firebase
 import { getAuth} from 'firebase/auth';
 import { getApp } from 'firebase/app';
 
-import { currentDirStore, currentElementsData } from '$lib/store.js';
+import { currentPath, currentDirStore, currentElementsData } from '$lib/store.js';
 import { get } from 'svelte/store';
 
 const app = getApp();
@@ -30,10 +30,6 @@ async function newFolder(rootCollectionRef) {
 
 }
 
-/**
- * @param {import("@firebase/firestore/lite").Query<any, import("@firebase/firestore/lite").DocumentData>} dir
- */
-
 async function getDirDocsData(dir) {
 	const querySnapshot = await getDocs(dir);
 	return (querySnapshot.docs.map(x => x.data()));
@@ -54,6 +50,8 @@ function goForwardDir(dirName) {
     getDirDocs(get(currentDirStore)).then(x => x.forEach(doc => {
         if (doc.data().name === dirName && ! doc.data().isFile) {
             currentDirStore.set(collection(doc.ref, "folder"));
+						currentPath.update((x) => [...x, doc.data()]);
+						console.log(get(currentPath));
 						getDirDocs(get(currentDirStore)).then(x => currentElementsData.set(x));
         }
     }));
@@ -62,6 +60,7 @@ function goForwardDir(dirName) {
 async function goBackDir(dirCollection) {
 	if  (get(currentDirStore).id !== "root") {
 		currentDirStore.set(dirCollection.parent.parent);
+		currentPath.update(x => x.slice(0, -1));
 		getDirDocsData(get(currentDirStore)).then(x => currentElementsData.set(x));
 	}
 }

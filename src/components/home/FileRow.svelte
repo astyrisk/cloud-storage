@@ -1,8 +1,10 @@
 <script>
 	import { TableBodyCell, TableBodyRow } from 'flowbite-svelte';
 	import { downloadFile } from '$lib/db.js';
+	import {currentPath} from '$lib/store.js';
 
 	export let document;
+
 </script>
 
 <TableBodyRow>

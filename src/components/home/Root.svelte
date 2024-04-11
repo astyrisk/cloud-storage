@@ -5,12 +5,13 @@
 	import { collection, doc, addDoc, setDoc, getDocs, getFirestore } from 'firebase/firestore/lite';
 	import { getStorage, ref, uploadBytes, getDownloadURL  } from "firebase/storage";
 	import { goBackDir, getDirDocs, getDirDocsData } from '$lib/db.js';
-	import {currentDirStore, currentElementsData} from '$lib/store.js';
+	import { currentDirStore, currentElementsData, currentPath } from '$lib/store.js';
 	import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
 	import { Button, ButtonGroup } from 'flowbite-svelte';
 	import FolderRow from './FolderRow.svelte';
 	import FileRow from './FileRow.svelte';
 	import HeaderRow from './HeaderRow.svelte';
+	import { getDoc } from 'firebase/firestore';
 
 	const app = getApp();
 	const auth = getAuth();
@@ -57,6 +58,14 @@
 	async function handleGoBackDir() {
 		goBackDir($currentDirStore);
 	}
+
+
+
+	// const parentDirectory = $currentDirStore.parent;
+	// getDoc(parentDirectory)
+	// 	.then(result => {
+	// 		console.log(result);
+	// 	});
 </script>
 
 <input type="file" id="fileInput" style="display: none;" on:change={handleFileChange} />
