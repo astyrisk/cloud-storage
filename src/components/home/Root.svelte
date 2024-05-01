@@ -2,16 +2,14 @@
 	// https://www.npmjs.com/package/exiftool
 	import { getApp } from 'firebase/app';
 	import { getAuth} from 'firebase/auth';
-	import { collection, doc, addDoc, setDoc, getDocs, getFirestore } from 'firebase/firestore/lite';
-	import { getStorage, ref, uploadBytes, getDownloadURL  } from "firebase/storage";
-	import { goBackDir, getDirDocs, getDirDocsData } from '$lib/db.js';
-	import { currentDirStore, currentElementsData, currentPath } from '$lib/store.js';
+	import { collection, doc, addDoc, setDoc, getDocs, getFirestore } from 'firebase/firestore';
+	import { updateData } from '$lib/db.js';
+	import { rootDir, currentDir, currentElementsData } from '$lib/store.js';
 	import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
 	import { Button, ButtonGroup } from 'flowbite-svelte';
 	import FolderRow from './FolderRow.svelte';
 	import FileRow from './FileRow.svelte';
 	import HeaderRow from './HeaderRow.svelte';
-	import { getDoc } from 'firebase/firestore';
 
 	const app = getApp();
 	const auth = getAuth();
@@ -23,49 +21,83 @@
 	const user = auth.currentUser;
 	const userDocRef = doc(db, "Users", user.uid);
 
-	currentDirStore.set(collection(userDocRef, "root"));
-	getDirDocsData($currentDirStore).then(x => $currentElementsData = x);
+	currentDir.set(collection(userDocRef, "root"));
+	rootDir.set(collection(userDocRef, "root"));
+	updateData();
 
-	function handleFileChange(event) {
+	async function handleFileChange(event) {
 		const file = event.target.files[0];
-		if (file) {
-			selectedFile = {
-				name: file.name,
-				size: (file.size / 1024).toFixed(2) + ' KB',
-				type: file.type,
-				isFile: true,
-				ref: "images" + file.name
-			};
-			addDoc($currentDirStore, selectedFile);
-			getDirDocsData($currentDirStore).then(x => $currentElementsData = x);
-		}
+
+		const uploadToServer = async (url, formData) => {
+			const response = await fetch(url, {
+				method: 'POST',
+				body: formData
+			});
+			if (!response.ok) {
+				throw new Error('Network response was not ok');
+			}
+			return response.json();
+		};
+
+		const uploadLocally = async (formData) => {
+			return uploadToServer('http://localhost:3000/upload/local', formData);
+		};
+
+		const uploadToFirebase = async (formData) => {
+			return uploadToServer('http://localhost:3000/upload/firebase', formData);
+		};
+
+		const handleFileUpload = async (formData) => {
+			try {
+				const [localData, firebaseData] = await Promise.all([
+					uploadLocally(formData),
+					uploadToFirebase(formData)
+				]);
+
+				console.log('Local Data:', localData);
+				console.log('Firebase Data:', firebaseData.url[0]);
+
+				if (file) {
+					const selectedFile = {
+						name: file.name,
+						size: file.size,
+						type: file.type,
+						date: file.lastModifiedDate,
+						isFile: true,
+						url: firebaseData.url[0]
+					};
+					addDoc($currentDir, selectedFile);
+					updateData();
+				}
+			} catch (error) {
+				console.error('Error:', error);
+				alert('An error occurred while uploading the file');
+			}
+		};
+
+		const formData = new FormData();
+		formData.append('file', file);
+
+		handleFileUpload(formData);
 	}
 
 	function handleNewFile() {
-		let file = document.getElementById('fileInput').click();
+		document.getElementById('fileInput').click();
 	}
 
 	function handleNewFolder() {
 		let name = prompt("new folder name: ");
-		addDoc($currentDirStore, {
+		if (name == null) {
+			return;
+		}
+	  console.log(name);
+
+		addDoc($currentDir, {
 			name: name,
-			isFile: false,
-			parent: $currentDirStore,
-		});
-		getDirDocsData($currentDirStore).then(x => $currentElementsData = x);
+			isFile: false
+		})
+		updateData();
 	}
-
-	async function handleGoBackDir() {
-		goBackDir($currentDirStore);
-	}
-
-
-
-	// const parentDirectory = $currentDirStore.parent;
-	// getDoc(parentDirectory)
-	// 	.then(result => {
-	// 		console.log(result);
-	// 	});
 </script>
 
 <input type="file" id="fileInput" style="display: none;" on:change={handleFileChange} />
@@ -77,15 +109,8 @@
 
 	<div class="table">
 		<Table>
-			<HeaderRow isRoot={($currentDirStore).id === "root"} />
-		<TableBody>
-			{#if ($currentDirStore).id !== "root"}
-				<TableBodyRow >
-					<TableBodyCell style="cursor: pointer" on:click={handleGoBackDir}>
-						<p> .. </p>
-					</TableBodyCell>
-				</TableBodyRow>
-			{/if}
+			<HeaderRow isRoot={($currentDir).id === "root"} />
+			<TableBody>
 			{#each $currentElementsData as document}
 				{#if !document.isFile}
 					<FolderRow {document} />
@@ -94,7 +119,7 @@
 
 			{#each $currentElementsData as document}
 				{#if document.isFile}
-					<FileRow {document} />
+					<FileRow doc={document} />
 				{/if}
 			{/each}
 		</TableBody>

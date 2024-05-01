@@ -1,6 +1,6 @@
 <script>
 	import { TableBodyCell, TableBodyRow } from 'flowbite-svelte';
-	import { goForwardDir } from '$lib/db.js';
+	import { goForwardDir, updateData } from '$lib/db.js';
 
 	export let document;
 

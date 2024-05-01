@@ -1,8 +1,8 @@
-import { collection, doc, addDoc, setDoc, getDocs, getFirestore } from 'firebase/firestore/lite';
+import { collection, doc, addDoc, setDoc, getDocs, getFirestore } from 'firebase/firestore';
 import { getAuth} from 'firebase/auth';
 import { getApp } from 'firebase/app';
 
-import { currentPath, currentDirStore, currentElementsData } from '$lib/store.js';
+import { currentPath, currentDir, currentElementsData } from '$lib/store.js';
 import { get } from 'svelte/store';
 
 const app = getApp();
@@ -47,25 +47,20 @@ function deleteFileOrFolder() {
 }
 
 function goForwardDir(dirName) {
-    getDirDocs(get(currentDirStore)).then(x => x.forEach(doc => {
+    getDirDocs(get(currentDir)).then(x => x.forEach(doc => {
         if (doc.data().name === dirName && ! doc.data().isFile) {
-            currentDirStore.set(collection(doc.ref, "folder"));
-						currentPath.update((x) => [...x, doc.data()]);
-						console.log(get(currentPath));
-						getDirDocs(get(currentDirStore)).then(x => currentElementsData.set(x));
+            currentDir.set(collection(doc.ref, "folder"));
+						currentPath.update((x) => [...x, doc]);
+						updateData();
         }
     }));
 }
 
-async function goBackDir(dirCollection) {
-	if  (get(currentDirStore).id !== "root") {
-		currentDirStore.set(dirCollection.parent.parent);
-		currentPath.update(x => x.slice(0, -1));
-		getDirDocsData(get(currentDirStore)).then(x => currentElementsData.set(x));
-	}
+function downloadFile() {
 }
 
-function downloadFile() {
+function updateData() {
+	getDirDocsData(get(currentDir)).then(x => currentElementsData.set(x));
 }
 
 async function createUserDocument(uid, name, email) {
@@ -87,8 +82,6 @@ async function createUserDocument(uid, name, email) {
 	await addDoc(rootCollectionRef, {
 		name: "randomFolder1",
 		isFile: false,
-		parent: "root",
-		parentData: ""
 	});
 }
-export { getDirDocsData, getDirDocs, createUserDocument,  newFile, newFolder, deleteFileOrFolder,  goForwardDir, goBackDir, downloadFile };
+export { updateData, getDirDocsData, getDirDocs, createUserDocument,  newFile, newFolder, deleteFileOrFolder,  goForwardDir, downloadFile };
