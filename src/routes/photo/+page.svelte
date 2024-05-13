@@ -5,7 +5,6 @@
   import { getApp } from 'firebase/app';
   import { getAuth} from 'firebase/auth';
 
-
   let images = [];
 
   const app = getApp();
@@ -15,11 +14,18 @@
   let galleryData = [];
   let currentGalleryDoc = null;
 
+  // const galleryCollectionRef = collection(userDocRef, "gallery");
   const user = auth.currentUser;
 
-  const userDocRef = doc(db, "Users", user.uid);
+  let userDocRef = null;
+  let galleryCollectionRef = null;
 
-  const galleryCollectionRef = collection(userDocRef, "gallery");
+  if (user) {
+      userDocRef = doc(db, "Users", user.uid);
+      galleryCollectionRef = collection(userDocRef, "gallery");
+
+  }
+
 
   async function getCollectionDocsData(collectionRef) {
       const querySnapshot = await getDocs(collectionRef);
@@ -180,7 +186,7 @@
                         <div class="row">
                             <TableBodyRow on:click={handleGalleryClick}>
                                 <TableBodyCell >{gal.name}</TableBodyCell>
-                                <TableBodyCell>{gal.date.toDate().toLocaleDateString()}</TableBodyCell>
+<!--                                <TableBodyCell>{gal.date.toDate().toLocaleDateString()}</TableBodyCell>-->
                             </TableBodyRow>
                         </div>
                     {/each}

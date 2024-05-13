@@ -38,6 +38,7 @@
 	"type": "module",
 	"dependencies": {
 		"exiftool": "^0.0.3",
-		"firebase": "^10.8.1"
+		"firebase": "^10.8.1",
+		"howler": "^2.2.4"
 	}
 }
