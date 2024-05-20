@@ -8,7 +8,6 @@
 	import Unlogged from '../components/home/Unlogged.svelte';
 	import Logged from '../components/home/Logged.svelte';
 
-
 	let user = null;
 	let mounted = false;
 

@@ -31,16 +31,14 @@
 		}
 	}
 
-	function formatLastModifiedDate(lastModifiedTimestamp) {
-		const milliseconds = lastModifiedTimestamp * 1000;
-		const date = new Date(milliseconds);
+	function formatLastModified(lastModifiedTimestamp) {
+		const date = new Date(lastModifiedTimestamp);
 
-		// console.log(date);
 		const year = date.getFullYear();
 		const month = String(date.getMonth() + 1).padStart(2, '0');
 		const day = String(date.getDate()).padStart(2, '0');
 
-		return `${year - 1969}-${month}-${day}`;
+		return `${year}-${month}-${day}`;
 	}
 
 	function downloadFile() {
@@ -55,5 +53,5 @@
 	</TableBodyCell>
 	<TableBodyCell>{doc.type}</TableBodyCell>
 	<TableBodyCell>{bytesToKilobytesOrMegabytes(doc.size)}</TableBodyCell>
-	<TableBodyCell>{formatLastModifiedDate(doc.date)}</TableBodyCell>
+	<TableBodyCell>{formatLastModified(doc.date)}</TableBodyCell>
 </TableBodyRow>

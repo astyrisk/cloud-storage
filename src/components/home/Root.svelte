@@ -3,7 +3,7 @@
 	import { getApp } from 'firebase/app';
 	import { getAuth} from 'firebase/auth';
 	import { collection, doc, addDoc, setDoc, getDocs, getFirestore } from 'firebase/firestore';
-	import { updateData } from '$lib/db.js';
+	import { updateData, getDirDocsData } from '$lib/db.js';
 	import { rootDir, currentDir, currentElementsData } from '$lib/store.js';
 	import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
 	import { Button, ButtonGroup } from 'flowbite-svelte';
@@ -14,9 +14,6 @@
 	const app = getApp();
 	const auth = getAuth();
 	const db = getFirestore(app);
-
-	//TODO move to stores
-	let selectedFile = null;
 
 	const user = auth.currentUser;
 	const userDocRef = doc(db, "Users", user.uid);
@@ -49,23 +46,42 @@
 
 		const handleFileUpload = async (formData) => {
 			try {
-				const [localData, firebaseData] = await Promise.all([
-					uploadLocally(formData),
-					uploadToFirebase(formData)
-				]);
-
+				// Step 1: Upload locally
+				const localData = await uploadLocally(formData);
 				console.log('Local Data:', localData);
+
+				const currentDocs = await getDirDocsData($currentDir);
+
+				if (currentDocs.some(x => x.fileHash === localData.fileHash)){
+					alert("this file is already uploaded!");
+					return;
+				}
+
+				if (currentDocs.some(x => x.name === file.name)){
+					alert("file name already exists!");
+					return;
+				}
+
+				// Step 2: If local upload is successful, upload to Firebase
+				const firebaseData = await uploadToFirebase(formData);
 				console.log('Firebase Data:', firebaseData.url[0]);
 
+				// Check if file is defined
 				if (file) {
 					const selectedFile = {
 						name: file.name,
 						size: file.size,
 						type: file.type,
-						date: file.lastModifiedDate,
+						date: file.lastModified,
 						isFile: true,
+						fileHash: localData.fileHash,
 						url: firebaseData.url[0]
 					};
+
+					console.log(selectedFile);
+					console.log(file);
+
+					// Add document to current directory and update data
 					addDoc($currentDir, selectedFile);
 					updateData();
 				}
@@ -81,29 +97,39 @@
 		handleFileUpload(formData);
 	}
 
-	function handleNewFile() {
-		document.getElementById('fileInput').click();
-	}
-
 	function handleNewFolder() {
 		let name = prompt("new folder name: ");
+
 		if (name == null) {
 			return;
 		}
-	  console.log(name);
 
-		addDoc($currentDir, {
-			name: name,
-			isFile: false
-		})
-		updateData();
+		if (name.indexOf('.')!== -1) {
+			alert("dots are not allowed in folders names");
+			return;
+		}
+
+		getDirDocsData($currentDir).then( x => {
+				const isDuplicate = x.some(obj => obj.name === name);
+				if (isDuplicate) {
+					alert("folder is already created!");
+					return;
+				}
+				addDoc($currentDir, {
+					name: name,
+					isFile: false
+				})
+				updateData();
+			}
+		)
+
 	}
 </script>
 
 <input type="file" id="fileInput" style="display: none;" on:change={handleFileChange} />
 <main>
 	<ButtonGroup>
-		<Button on:click={handleNewFile}>New File</Button>
+		<Button on:click={() => document.getElementById('fileInput').click()}>New File</Button>
 		<Button on:click={handleNewFolder}>New Folder</Button>
 	</ButtonGroup>
 
