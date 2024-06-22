@@ -18,16 +18,15 @@
 </script>
 
 <main>
-	<Navbar  >
+	<Navbar>
 		<NavBrand href="/">
-			<span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white">&FILE</span>
+			<div class="title">
+				&FILE
+			</div>
 		</NavBrand>
-		<NavUl >
-			<NavLi href="/">Home</NavLi>
+		<NavUl>
 			<NavLi href="/login">Login</NavLi>
 			<NavLi href="/register">Register</NavLi>
-			<NavLi href="/">Pricing</NavLi>
-			<NavLi href="/about">About</NavLi>
 		</NavUl>
 	</Navbar>
 
@@ -54,4 +53,8 @@
 		form {
 				max-width: 50%;
 		}
+    .title {
+        font-size: 2.3em;
+        font-weight: bold;
+    }
 </style>

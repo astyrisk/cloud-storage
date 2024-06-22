@@ -3,7 +3,7 @@
 	import {onMount} from 'svelte';
 	import { getApp } from 'firebase/app';
 	import Gallery from './Gallery.svelte';
-	import { Navbar, NavBrand, NavLi, NavUl } from 'flowbite-svelte';
+	import Nav from '../../components/Nav.svelte';
 
 	let user = null;
 	let mounted = false;
@@ -16,19 +16,9 @@
 </script>
 
 <main>
-	<Navbar  >
-		<NavBrand href="/">
-			<span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white">&FILE</span>
-		</NavBrand>
-		<NavUl >
-			<NavLi href="/photo">Photo</NavLi>
-			<NavLi href="/audio">Audio</NavLi>
-			<NavLi href="/video">Video</NavLi>
-			<NavLi href="/text">Text</NavLi>
-			<NavLi href="/">Profile</NavLi>
-      <NavLi href="/register" on:click={logout}>Logout</NavLi>
-		</NavUl>
-	</Navbar>
+
+	<Nav />
+
 	{#if mounted && user}
 		<Gallery />
 	{/if}

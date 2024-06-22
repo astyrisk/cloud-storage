@@ -3,6 +3,7 @@
 	import { getFirestore, collection, getDocs, doc, addDoc } from 'firebase/firestore';
 	import { getApp } from 'firebase/app';
 	import { getAuth} from 'firebase/auth';
+	import { getDirDocsData, getDirDocs } from '$lib/db.js'
 	import {Howl} from 'howler';
 	import {onMount} from 'svelte';
 	import AudioPlayer from './AudioPlayer.svelte';
@@ -21,67 +22,59 @@
 	const userDocRef = doc(db, "Users", user.uid);
 	const musicCollectionRef = collection(userDocRef, "music");
 
-	getCollectionDocsData(musicCollectionRef).then(x => artistsData = x);
+	onMount(async () => {
+		artistsData = await getDirDocsData(musicCollectionRef);
+	})
 
-	async function getCollectionDocsData(collectionRef) {
-		const querySnapshot = await getDocs(collectionRef);
-		return (querySnapshot.docs.map(x => x.data()));
-	}
+	// getDirDocsData(musicCollectionRef).then(x => artistsData = x);
 
-	async function getCollectionDocs(collectionRef) {
-		const querySnapshot = await getDocs(collectionRef);
-		return (querySnapshot.docs.map(x => x));
-	}
+	// async function getCollectionDocsData(collectionRef) {
+	// 	const querySnapshot = await getDocs(collectionRef);
+	// 	return (querySnapshot.docs.map(x => x.data()));
+	// }
+	//
+	// async function getCollectionDocs(collectionRef) {
+	// 	const querySnapshot = await getDocs(collectionRef);
+	// 	return (querySnapshot.docs.map(x => x));
+	// }
 
+	/* takes an artist name and checks if it's already added */
 	async function addArtist(name) {
-		// Attempt to find the artist in the collection
-		const docs = await getCollectionDocs(musicCollectionRef);
+		const docs = await getDirDocs(musicCollectionRef);
+		console.log(docs);
+
 		const selectedDoc = docs.find(a => a.data().name === name);
 
-		// If found, return the existing document
 		if (selectedDoc) {
-			// console.log(selectedDoc);
 			return selectedDoc.ref;
 		}
 
-		// If not found, add a new document
 		try {
 			const artist = await addDoc(musicCollectionRef, { name });
-			console.log(artist);
 			return artist;
 		} catch (error) {
 			console.error("Failed to add artist:", error);
-			throw error; // Rethrow the error if needed
+			throw error;
 		}
 	}
 
-	function goToArtist(name) {
-		getCollectionDocs(musicCollectionRef)
-			.then(documents => documents.filter(doc => doc.data().name === name))
-			.then(filteredDocs => {
-				currentArtistDoc = filteredDocs[0];
-				// console.log(filteredDocs[0].data().name);
-				updateData();
-			});
+	async function goToArtist(name) {
+		let artistsDocs = await getDirDocs(musicCollectionRef);
+		currentArtistDoc = artistsDocs.find(a => decodeHtmlString(a.data().name) === decodeHtmlString(name));
+		updateData();
 	}
 
-	function handleArtistClick(e) {
-		goToArtist(Array.from(e.target.parentNode.children)[0].innerHTML);
-	}
-
-	function updateData() {
+	async function updateData() {
 		if (currentArtistDoc == null) {
-			getCollectionDocsData(musicCollectionRef).then(x => artistsData = x);
+			getDirDocsData(musicCollectionRef).then(x => artistsData = x);
 		} else {
-			let songsCollection = collection(currentArtistDoc.ref, "songs");
-			getCollectionDocsData(songsCollection).then(data => {
-				songs = data.map(doc => ({
-					name: doc.name,
-					src: doc.url
-				}));
-			});
+			const songsData = await getDirDocsData(collection(currentArtistDoc.ref, "songs"));
 
-			//NOTE not good
+			//TODO rewrite songs array
+			songs = songsData.map(doc => ({
+				name: doc.name,
+				src: doc.url
+			}));
 		}
 	}
 
@@ -114,53 +107,60 @@
 
 		const handleFileUpload = async (formData) => {
 			try {
-				const [localData, firebaseData] = await Promise.all([
-					uploadLocally(formData),
-					uploadToFirebase(formData)
-				]);
-
-				// console.log('Local Data:', localData["metadata"][0]);
-				console.log('Artist:', localData["metadata"][0]["Artist"]);
-				console.log('Album:', localData["metadata"][0]["Album"]);
-				// console.log('Firebase Data:', firebaseData.url[0]);
+				const localData = await  uploadLocally(formData);
 
 				let artist = localData["metadata"][0]["Artist"];
 				let album = localData["metadata"][0]["Album"];
 
-				if (artist == undefined) {
+				if (artist === undefined) {
 					artist = prompt("Enter artist name!");
 				}
-				if (album == undefined) {
-					artist = prompt("Enter album name!");
+				if (album === undefined) {
+					album = prompt("Enter album name!");
 				}
+
+				console.log(artist);
+
+				// let artistsDocs = await  getDirDocs(musicCollectionRef);
+				// let selectedArtistDoc = artistsDocs.find(a => a.data().name === artist);
+
+				let selectedArtistDoc = await addArtist(artist);
+				const selectedAristSongs = await getDirDocsData(collection(selectedArtistDoc, "songs"));
+
+				if (selectedAristSongs.some(x => x.fileHash === localData.fileHash)){
+					alert("this song is already uploaded!");
+					return;
+				}
+
+				if (selectedAristSongs.some(x => x.name === file.name)){
+					alert("file name already exists!");
+					return;
+				}
+
+				const firebaseData = await  uploadToFirebase(formData);
+
+				// console.log('Local Data:', localData["metadata"][0]);
+				// console.log('Artist:', localData["metadata"][0]["Artist"]);
+				// console.log('Album:', localData["metadata"][0]["Album"]);
+				// console.log('Firebase Data:', firebaseData.url[0]);
 
 				if (file) {
 					const selectedFile = {
 						name: file.name,
 						size: file.size,
 						type: file.type,
-						date: file.lastModifiedDate,
+						date: file.lastModified,
 						isFile: true,
 						artist: artist,
 						album: album,
-						url: firebaseData.url[0]
+						fileHash: localData.fileHash,
+						url: firebaseData["url"]
 					};
 
-					let artistDocumentRef = null;
 					addArtist(artist).then(x => {
-
-						console.log(x);
-
 						addDoc(collection(x, "songs"), selectedFile);
-
-						// console.log(x);
-						// artistDocumentRef = x
-						// if (artistDocumentRef != null) {
-						//     addDoc(collection(artistDocumentRef, "songs"), selectedFile);
-						// }
 						updateData();
 					});
-
 				}
 			} catch (error) {
 				console.error('Error:', error);
@@ -170,8 +170,17 @@
 
 		const formData = new FormData();
 		formData.append('file', file);
-
 		handleFileUpload(formData);
+	}
+
+	function decodeHtmlString(htmlString) {
+		let tempElement = document.createElement('div');
+		tempElement.innerHTML = htmlString;
+		return tempElement.textContent || tempElement.innerText;
+	}
+
+	function handleArtistClick(e) {
+		goToArtist(Array.from(e.target.parentNode.children)[0].innerHTML);
 	}
 
 	function handleNewFile() {
@@ -180,16 +189,14 @@
 
 	function handleSongClick () {
 		// console.log(sound);
-		sound.play();
+		// sound.play();
 	}
 
 	function handleGoBack(){
 		currentArtistDoc= null;
 		updateData();
 	}
-
 	updateData();
-
 </script>
 
 <main>
@@ -203,7 +210,6 @@
 					<TableHead>
 						<TableHeadCell>Artists</TableHeadCell>
 					</TableHead>
-
 					<TableBody tableBodyClass="divide-y">
 						{#each artistsData as artist}
 							<div class="row">
@@ -220,8 +226,6 @@
 		<div style="margin-top: 4em">
 			<Button color="light" on:click={handleGoBack}>go back</Button>
 		</div>
-
-
 		<div style="margin-top: 3em"></div>
 		<Table >
 			<TableHead>
@@ -238,9 +242,8 @@
 				{/each}
 			</TableBody>
 		</Table>
-
 		<div class="audio">
-			<AudioPlayer src="https://storage.googleapis.com/file-4cacd.appspot.com/uploads/1715545677584_Pink%20Floyd%20-%2001%20-%20Shine%20On%20You%20Crazy%20Diamond%20%28Part%20One%29.mp3?GoogleAccessId=firebase-adminsdk-7d5di%40file-4cacd.iam.gserviceaccount.com&Expires=16730319600&Signature=UX%2Bz0sQz9vKA8NjjiEfCSn6xlb1LSLKiKtbLOleVFQ70s0I1Znf1IKOZEJM1%2B3BDKBTyTqcW53lJ3ISin5gZ%2B4p0ZtDPluIcql6f0v71FdbcQlQTn0xIjiezciiLvL%2FjOufIAY9QZnMPRA6fCf1wYq0mZGbXY%2FnZj8DxrIqAx5pX74EgRhfT3lQs0Gt9gph4iObXkD7e3rGRSfyaYFwRqRBcqkwLjZYnekrGEBmgwQT1WapAORA3bnaGHkaiDaw%2Fzo%2Bl%2BqPnNSZPfwYB6AYoJmbMfjo892TpLI6kNMq3IkvgMfRanyA5pHeLqaV4i5h4vmOJlfkLKOnYpkuVW8Dd3Q%3D%3D" />
+			<AudioPlayer src="" />
 		</div>
 	{/if}
 </main>
@@ -256,12 +259,10 @@
     .row {
         cursor: pointer;
     }
-
     .audio {
         width: 70%;
         position: absolute;
         bottom: 0;
         margin-bottom: 5em;
     }
-
 </style>

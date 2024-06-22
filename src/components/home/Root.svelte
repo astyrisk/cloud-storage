@@ -75,7 +75,7 @@
 						date: file.lastModified,
 						isFile: true,
 						fileHash: localData.fileHash,
-						url: firebaseData.url[0]
+						url: firebaseData["url"]
 					};
 
 					console.log(selectedFile);

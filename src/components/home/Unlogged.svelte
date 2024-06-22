@@ -1,16 +1,16 @@
 <script>
 	import { Navbar, NavBrand, NavLi, NavUl } from 'flowbite-svelte';
 </script>
+
 <Navbar>
 	<NavBrand href="/">
-		<span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white">&FILE</span>
+		<div class="title">
+			&FILE
+		</div>
 	</NavBrand>
-	<NavUl >
-		<NavLi href="/">Home</NavLi>
+	<NavUl>
 		<NavLi href="/login">Login</NavLi>
 		<NavLi href="/register">Register</NavLi>
-		<NavLi href="/">Pricing</NavLi>
-		<NavLi href="/">About</NavLi>
 	</NavUl>
 </Navbar>
 
@@ -21,10 +21,18 @@
 </div>
 
 <style>
-    p { margin-top: 4em; }
+    p {
+				margin-top: 4em;
+		}
+
     img {
         position: absolute;
         right: 0;
         bottom: 0;
+    }
+
+    .title {
+        font-size: 2.3em;
+        font-weight: bold;
     }
 </style>

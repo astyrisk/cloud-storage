@@ -1,13 +1,11 @@
 <script>
 	import { checkUserLoggedIn, logout } from '$lib/auth.js';
 	import {onMount} from 'svelte';
-	import { getApp } from 'firebase/app';
-	import Text from './Text.svelte';
+	import Profile from './Profile.svelte';
 	import Nav from '../../components/Nav.svelte';
 
 	let user = null;
 	let mounted = false;
-	const app = getApp();
 
 	onMount(async () => {
 		user = await checkUserLoggedIn();
@@ -18,7 +16,7 @@
 <main>
 	<Nav />
 	{#if mounted && user}
-		<Text />
+		<Profile />
 	{/if}
 </main>
 

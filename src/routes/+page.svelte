@@ -1,7 +1,5 @@
 
 <script>
-	// TODO profile tab. the user's data should be stored in a dbs. he should be able to change any of its!.
-	// TODO navbar to go through different tabs
 	import { checkUserLoggedIn, logout } from '$lib/auth.js';
 	import { onMount } from 'svelte';
 
@@ -17,6 +15,8 @@
 	});
 
 </script>
+
+
 
 <main>
 	{#if mounted}
