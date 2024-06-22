@@ -17,6 +17,8 @@
 	let artistsData = [];
 	let currentArtistDoc = null;
 
+	let currentSong = null;
+
 	const user = auth.currentUser;
 
 	const userDocRef = doc(db, "Users", user.uid);
@@ -187,7 +189,8 @@
 		document.getElementById('fileInput').click();
 	}
 
-	function handleSongClick () {
+	function handleSongClick (song) {
+		currentSong = song;
 		// console.log(sound);
 		// sound.play();
 	}
@@ -233,7 +236,7 @@
 			</TableHead>
 			<TableBody tableBodyClass="divide-y">
 				{#each songs as song }
-					<div style="cursor: pointer" on:click={handleSongClick}>
+					<div style="cursor: pointer" on:click={() => handleSongClick(song.src)}>
 						<TableBodyRow >
 							<TableBodyCell>{song.name}</TableBodyCell>
 							<!--                        <TableBodyCell >{song.url}</TableBodyCell>-->
@@ -243,7 +246,7 @@
 			</TableBody>
 		</Table>
 		<div class="audio">
-			<AudioPlayer src="" />
+			<AudioPlayer src={currentSong} />
 		</div>
 	{/if}
 </main>

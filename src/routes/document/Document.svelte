@@ -147,6 +147,11 @@
 				if (creator === undefined){
 					creator = prompt("enter the name of the author");
 				}
+
+				if (creator === undefined || creator == ""){
+					alert("author name shouldn't be empty")
+					return;
+				}
 				// console.log("author is ", creator);
 
 				// Step 2: If local upload is successful, upload to Firebase
