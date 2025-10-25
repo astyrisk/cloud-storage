@@ -9,3 +9,7 @@ node_modules
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 file-backend/file-4cacd-firebase-adminsdk-7d5di-0f4e2238db.json
+
+
+# Google Cloud credentials
+file-backend/file-4cacd-firebase-adminsdk-7d5di-0f4e2238db.json
