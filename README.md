@@ -1,5 +1,7 @@
 # FILE: A SvelteKit File Manager
 
+![Project Preview](preview.png)
+
 This is a web-based file manager application built with SvelteKit, Tailwind CSS, and Firebase. It allows users to manage and view various file types, including photos, videos, audio, documents, and text files.
 
 ## Features
