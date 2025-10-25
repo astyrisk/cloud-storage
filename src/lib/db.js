@@ -79,9 +79,9 @@ async function createUserDocument(uid, name, email) {
 	// 	size: "100KB",
 	// });
 	//
-	await addDoc(rootCollectionRef, {
-		name: "randomFolder1",
-		isFile: false,
-	});
+	// await addDoc(rootCollectionRef, {
+	// 	name: "randomFolder1",
+	// 	isFile: false,
+	// });
 }
 export { updateData, getDirDocsData, getDirDocs, createUserDocument,  newFile, newFolder, deleteFileOrFolder,  goForwardDir, downloadFile };

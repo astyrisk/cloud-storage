@@ -22,6 +22,12 @@
 	rootDir.set(collection(userDocRef, "root"));
 	updateData();
 
+	let isRoot = true;
+	// isRoot = ($currentDir).id === "root";
+
+
+
+
 	async function handleFileChange(event) {
 		const file = event.target.files[0];
 
@@ -104,6 +110,12 @@
 			return;
 		}
 
+		name = name.replace(/\s+/g, '');
+
+		if (name == "") {
+			alert("empty names are not allowed!");
+		}
+
 		if (name.indexOf('.')!== -1) {
 			alert("dots are not allowed in folders names");
 			return;
@@ -136,6 +148,7 @@
 	<div class="table">
 		<Table>
 			<HeaderRow isRoot={($currentDir).id === "root"} />
+<!--			<HeaderRow isRoot={true} />-->
 			<TableBody>
 			{#each $currentElementsData as document}
 				{#if !document.isFile}

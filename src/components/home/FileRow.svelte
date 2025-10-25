@@ -42,8 +42,24 @@
 	}
 
 	function downloadFile() {
-		window.open(doc.url, '_blank');
+		fetch(doc.url)
+			.then(response => response.blob())
+			.then(blob => {
+				const url = window.URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				a.style.display = 'none';
+				a.href = url;
+				a.download = doc.name;
+				document.body.appendChild(a);
+				a.click();
+				window.URL.revokeObjectURL(url);
+				document.body.removeChild(a);
+			})
+			.catch(error => console.error('Download failed:', error));
 	}
+	// function downloadFile() {
+	// 	window.open(doc.url, '_blank');
+	// }
 </script>
 
 <TableBodyRow>

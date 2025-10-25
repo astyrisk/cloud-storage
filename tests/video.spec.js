@@ -4,9 +4,11 @@ test.describe('Video Component', () => {
 
 	test('login and redirect to video page', async ({ page }) => {
 		await page.goto('http://localhost:5173/login');
+		await page.waitForTimeout(3000);
 		await page.fill('input#email', 'kar@gmail.com');
 		await page.fill('input#password', '01050105');
 		await page.click('button[type=submit]');
+		await page.waitForTimeout(3000);
 		await page.waitForSelector('button:has-text("New Gallery")');
 		await page.goto('http://localhost:5173/video');
 		await page.waitForTimeout(3000);
@@ -15,8 +17,10 @@ test.describe('Video Component', () => {
 
 	test('new gallery button visibility', async ({ page }) => {
 		await page.goto('http://localhost:5173/login');
+		await page.waitForTimeout(3000);
 		await page.fill('input#email', 'kar@gmail.com');
 		await page.fill('input#password', '01050105');
+		await page.waitForTimeout(3000);
 		await page.click('button[type=submit]');
 		await page.goto('http://localhost:5173/video');
 		await page.waitForTimeout(3000);
@@ -25,8 +29,10 @@ test.describe('Video Component', () => {
 
 	test('should handle new gallery creation', async ({ page }) => {
 		await page.goto('http://localhost:5173/login');
+		await page.waitForTimeout(3000);
 		await page.fill('input#email', 'kar@gmail.com');
 		await page.fill('input#password', '01050105');
+		await page.waitForTimeout(3000);
 		await page.click('button[type=submit]');
 		await page.goto('http://localhost:5173/video');
 		await page.waitForTimeout(3000);
@@ -42,19 +48,21 @@ test.describe('Video Component', () => {
 
 	test('upload video file to gallery', async ({ page }) => {
 		await page.goto('http://localhost:5173/login');
+		await page.waitForTimeout(3000);
 		await page.fill('input#email', 'kar@gmail.com');
 		await page.fill('input#password', '01050105');
 		await page.click('button[type=submit]');
+		await page.waitForTimeout(3000);
 		await page.goto('http://localhost:5173/video');
 		await page.waitForTimeout(3000);
 
-		await page.click('text=New Gallery Name'); // Assuming this is the gallery created in the previous test
+		await page.click('text=New Gallery Name');
 		await page.waitForTimeout(3000);
 
 		await page.waitForSelector('button:has-text("upload")');
 		const [fileChooser] = await Promise.all([
 			page.waitForEvent('filechooser'),
-			page.click('button:has-text("upload")'), // Click triggers file chooser
+			page.click('button:has-text("upload")'),
 		]);
 
 		await fileChooser.setFiles('tests/sample_video.mp4');
@@ -65,9 +73,11 @@ test.describe('Video Component', () => {
 
 	test('view video in gallery', async ({ page }) => {
 		await page.goto('http://localhost:5173/login');
+		await page.waitForTimeout(3000);
 		await page.fill('input#email', 'kar@gmail.com');
 		await page.fill('input#password', '01050105');
 		await page.click('button[type=submit]');
+		await page.waitForTimeout(3000);
 		await page.goto('http://localhost:5173/video');
 		await page.waitForTimeout(3000);
 
@@ -80,12 +90,13 @@ test.describe('Video Component', () => {
 
 	test('go back to gallery list', async ({ page }) => {
 		await page.goto('http://localhost:5173/login');
+		await page.waitForTimeout(3000);
 		await page.fill('input#email', 'kar@gmail.com');
 		await page.fill('input#password', '01050105');
 		await page.click('button[type=submit]');
+		await page.waitForTimeout(3000);
 		await page.goto('http://localhost:5173/video');
 		await page.waitForTimeout(3000);
-
 		await page.click('text=New Gallery Name');
 		await page.waitForTimeout(3000);
 		await page.click('button:has-text("go back")');

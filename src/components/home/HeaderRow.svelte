@@ -28,11 +28,20 @@
 		updateData();
 	}
 </script>
-<TableHead>
+{#if isRoot}
+	<TableHead>
+		<TableHeadCell>
+			<p on:click={goToRoot} style="cursor: pointer; display: inline;">ROOT/</p>
+		</TableHeadCell>
+	</TableHead>
+{:else}
+	<TableHead>
 		<TableHeadCell>
 			<p on:click={goToRoot} style="cursor: pointer; display: inline;">ROOT/</p>
 			{#each $currentPath as curr}
 				<p on:click={goTo(curr)} style="cursor: pointer; display: inline;">{curr.data().name}/</p>
 			{/each}
 		</TableHeadCell>
-</TableHead>
+	</TableHead>
+
+{/if}

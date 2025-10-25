@@ -48,13 +48,13 @@ test.describe('Audio Component', () => {
 		await page.goto('http://localhost:5173/audio');
 		await page.waitForTimeout(3000);
 
-		await page.click('text=New Artist Name'); // Assuming this is the artist created in the previous test
+		await page.click('text=New Artist Name');
 		await page.waitForTimeout(3000);
 
 		await page.waitForSelector('button:has-text("upload")');
 		const [fileChooser] = await Promise.all([
 			page.waitForEvent('filechooser'),
-			page.click('button:has-text("upload")'), // Click triggers file chooser
+			page.click('button:has-text("upload")'),
 		]);
 
 		await fileChooser.setFiles('tests/sample_audio.mp3');

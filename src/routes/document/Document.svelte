@@ -134,7 +134,7 @@
 				// console.log(currentDocs);
 
 				if (currentDocs.some(x => x.fileHash === localData.fileHash)){
-					alert("this picture is already uploaded!");
+					alert("this document is already uploaded!");
 					return;
 				}
 
@@ -144,14 +144,17 @@
 				}
 				let creator = localData["metadata"][0]["Creator"];
 
-				if (creator === undefined){
+				if (creator === undefined || creator === ""){
 					creator = prompt("enter the name of the author");
+					while (creator === undefined || creator === "") {
+						creator = prompt("the author name shouldn't be empty");
+					}
 				}
 
-				if (creator === undefined || creator == ""){
-					alert("author name shouldn't be empty")
-					return;
-				}
+				// if (creator === undefined || creator == ""){
+				// 	alert("author name shouldn't be empty")
+				// 	return;
+				// }
 				// console.log("author is ", creator);
 
 				// Step 2: If local upload is successful, upload to Firebase

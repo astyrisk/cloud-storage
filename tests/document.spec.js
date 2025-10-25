@@ -4,9 +4,11 @@ test.describe('Document Component', () => {
 
 	test('login and redirect to document page', async ({ page }) => {
 		await page.goto('http://localhost:5173/login');
+		await page.waitForTimeout(3000);
 		await page.fill('input#email', 'kar@gmail.com');
 		await page.fill('input#password', '01050105');
 		await page.click('button[type=submit]');
+		await page.waitForTimeout(3000);
 		await page.waitForSelector('button:has-text("New Library")');
 		await page.goto('http://localhost:5173/document');
 		await page.waitForTimeout(3000);
@@ -15,9 +17,11 @@ test.describe('Document Component', () => {
 
 	test('new library button visibility', async ({ page }) => {
 		await page.goto('http://localhost:5173/login');
+		await page.waitForTimeout(3000);
 		await page.fill('input#email', 'kar@gmail.com');
 		await page.fill('input#password', '01050105');
 		await page.click('button[type=submit]');
+		await page.waitForTimeout(3000);
 		await page.goto('http://localhost:5173/document');
 		await page.waitForTimeout(3000);
 		await expect(page.locator('button:has-text("New Library")')).toBeVisible();
@@ -25,9 +29,11 @@ test.describe('Document Component', () => {
 
 	test('should handle new library creation', async ({ page }) => {
 		await page.goto('http://localhost:5173/login');
+		await page.waitForTimeout(3000);
 		await page.fill('input#email', 'kar@gmail.com');
 		await page.fill('input#password', '01050105');
 		await page.click('button[type=submit]');
+		await page.waitForTimeout(3000);
 		await page.goto('http://localhost:5173/document');
 		await page.waitForTimeout(3000);
 
@@ -42,19 +48,21 @@ test.describe('Document Component', () => {
 
 	test('upload document file to library', async ({ page }) => {
 		await page.goto('http://localhost:5173/login');
+		await page.waitForTimeout(3000);
 		await page.fill('input#email', 'kar@gmail.com');
 		await page.fill('input#password', '01050105');
 		await page.click('button[type=submit]');
+		await page.waitForTimeout(3000);
 		await page.goto('http://localhost:5173/document');
 		await page.waitForTimeout(3000);
 
-		await page.click('text=New Library Name'); // Assuming this is the library created in the previous test
+		await page.click('text=New Library Name');
 		await page.waitForTimeout(3000);
 
 		await page.waitForSelector('button:has-text("upload")');
 		const [fileChooser] = await Promise.all([
 			page.waitForEvent('filechooser'),
-			page.click('button:has-text("upload")'), // Click triggers file chooser
+			page.click('button:has-text("upload")'),
 		]);
 
 		await fileChooser.setFiles('tests/sample_document.pdf');
@@ -65,9 +73,11 @@ test.describe('Document Component', () => {
 
 	test('view document in library', async ({ page }) => {
 		await page.goto('http://localhost:5173/login');
+		await page.waitForTimeout(3000);
 		await page.fill('input#email', 'kar@gmail.com');
 		await page.fill('input#password', '01050105');
 		await page.click('button[type=submit]');
+		await page.waitForTimeout(3000);
 		await page.goto('http://localhost:5173/document');
 		await page.waitForTimeout(3000);
 
@@ -80,9 +90,11 @@ test.describe('Document Component', () => {
 
 	test('go back to library list', async ({ page }) => {
 		await page.goto('http://localhost:5173/login');
+		await page.waitForTimeout(3000);
 		await page.fill('input#email', 'kar@gmail.com');
 		await page.fill('input#password', '01050105');
 		await page.click('button[type=submit]');
+		await page.waitForTimeout(3000);
 		await page.goto('http://localhost:5173/document');
 		await page.waitForTimeout(3000);
 

@@ -190,9 +190,11 @@
 	}
 
 	function handleSongClick (song) {
-		currentSong = song;
-		// console.log(sound);
-		// sound.play();
+
+		currentSong = null;
+		setTimeout(() => {
+			currentSong = song;
+		}, 0);
 	}
 
 	function handleGoBack(){
@@ -246,7 +248,10 @@
 			</TableBody>
 		</Table>
 		<div class="audio">
-			<AudioPlayer src={currentSong} />
+<!--			<AudioPlayer src={currentSong} />-->
+			{#if currentSong}
+				<AudioPlayer src={currentSong} />
+			{/if}
 		</div>
 	{/if}
 </main>
